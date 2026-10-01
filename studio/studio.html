@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>vid2gif Stüdyo - Ekran GIF Kaydedici</title>
+  <link rel="stylesheet" href="studio.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Navigation Bar -->
+    <header class="navbar">
+      <div class="nav-brand">
+        <div class="brand-logo">
+          <div class="recording-pulse"></div>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">vid2gif <span class="badge-studio">Stüdyo</span></span>
+          <span class="brand-tagline">Yüksek Kaliteli Ekran & Pencere GIF Kaydedici</span>
+        </div>
+      </div>
+
+      <div class="nav-status">
+        <div id="statusBadge" class="status-badge status-ready">
+          <span class="status-dot"></span>
+          <span id="statusText">Kayıt İçin Hazır</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="main-content">
+      
+      <!-- STATE 1: Ready / Setup Panel -->
+      <section id="panelSetup" class="panel-card active">
+        <div class="setup-header">
+          <h2>Kayıt Öncesi Ayarlar</h2>
+          <p>Kaydetmek istediğiniz alanı seçmeden önce kalite ve boyut tercihlerinizi belirleyin.</p>
+        </div>
+
+        <div class="controls-grid">
+          <!-- FPS Option -->
+          <div class="control-box">
+            <label for="studioFps">Kare Hızı (FPS)</label>
+            <div class="select-wrapper">
+              <select id="studioFps" class="studio-select">
+                <option value="5">5 FPS - Minimum Boyut (Doküman/Slayt)</option>
+                <option value="10" selected>10 FPS - Önerilen (Akıcı & Dengeli)</option>
+                <option value="15">15 FPS - Çok Akıcı (Dinamik UI/Animasyon)</option>
+                <option value="20">20 FPS - Maksimum Akıcılık</option>
+              </select>
+            </div>
+            <span class="control-hint">Yüksek FPS daha akıcı görüntü sağlar ancak dosya boyutunu artırır.</span>
+          </div>
+
+          <!-- Resolution Option -->
+          <div class="control-box">
+            <label for="studioWidth">Çözünürlük Ölçeği</label>
+            <div class="select-wrapper">
+              <select id="studioWidth" class="studio-select">
+                <option value="640">640 px - Küçük & Hafif</option>
+                <option value="800" selected>800 px - Standart Önerilen</option>
+                <option value="1024">1024 px - Geniş Ekran</option>
+                <option value="1280">1280 px - 720p HD</option>
+                <option value="0">Orijinal (Ölçekleme Yapma)</option>
+              </select>
+            </div>
+            <span class="control-hint">Web ve sohbet uygulamalarında paylaşım için 800px idealdir.</span>
+          </div>
+
+          <!-- Colors Option -->
+          <div class="control-box">
+            <label for="studioColors">Renk Paleti</label>
+            <div class="select-wrapper">
+              <select id="studioColors" class="studio-select">
+                <option value="256" selected>256 Renk (Maksimum Kalite)</option>
+                <option value="128">128 Renk (Dengeli Sıkıştırma)</option>
+                <option value="64">64 Renk (Ultra Küçük Boyut)</option>
+              </select>
+            </div>
+            <span class="control-hint">Renk sayısını düşürmek dosya boyutunu %30-%50 oranında küçültebilir.</span>
+          </div>
+
+          <!-- Max Duration Option -->
+          <div class="control-box">
+            <label for="studioDuration">Otomatik Durdurma Süresi</label>
+            <div class="select-wrapper">
+              <select id="studioDuration" class="studio-select">
+                <option value="0" selected>Sınırsız (Manuel Durdur)</option>
+                <option value="5">5 Saniye</option>
+                <option value="10">10 Saniye</option>
+                <option value="15">15 Saniye</option>
+                <option value="30">30 Saniye</option>
+                <option value="60">60 Saniye (1 Dakika)</option>
+              </select>
+            </div>
+            <span class="control-hint">Belirlenen süre dolduğunda kayıt otomatik olarak sonlandırılır.</span>
+          </div>
+        </div>
+
+        <div class="action-footer">
+          <button id="btnStartCapture" class="btn btn-record btn-lg">
+            <span class="btn-record-icon"></span>
+            Ekranı Seç ve Kayda Başla
+          </button>
+          <p class="terms-note">
+            🛡️ Gizlilik: Kayıtlar %100 yerel olarak tarayıcınızda işlenir. Hiçbir görüntü harici bir sunucuya gönderilmez.
+          </p>
+        </div>
+      </section>
+
+      <!-- STATE 2: Recording Live Panel -->
+      <section id="panelRecording" class="panel-card">
+        <div class="recording-topbar">
+          <div class="recording-meta">
+            <div class="rec-indicator">
+              <span class="rec-dot"></span>
+              <span class="rec-text">CANLI KAYIT</span>
+            </div>
+            <div class="rec-timer" id="recordingTimer">00:00</div>
+          </div>
+
+          <div class="rec-stats">
+            <div class="stat-pill">
+              <span class="stat-label">Yakalanan Kare:</span>
+              <strong id="liveFrameCount">0</strong>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-label">Çözünürlük:</span>
+              <strong id="liveResolution">--- × ---</strong>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-label">Hedef FPS:</span>
+              <strong id="liveFps">10 FPS</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Screen Video Monitor -->
+        <div class="video-monitor-container">
+          <video id="liveVideo" autoplay muted playsinline></video>
+          <div id="videoOverlayPaused" class="video-overlay hidden">
+            <span>⏸️ Kayıt Duraklatıldı</span>
+          </div>
+        </div>
+
+        <!-- Recording Controls -->
+        <div class="recording-controls">
+          <button id="btnStopRecording" class="btn btn-danger btn-lg">
+            <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+              <rect x="6" y="6" width="12" height="12" rx="2"/>
+            </svg>
+            Kaydı Bitir & Düzenle
+          </button>
+
+          <button id="btnPauseResume" class="btn btn-secondary btn-lg">
+            <svg id="pauseIcon" class="icon" viewBox="0 0 24 24" fill="currentColor">
+              <rect x="6" y="5" width="4" height="14" rx="1"/>
+              <rect x="14" y="5" width="4" height="14" rx="1"/>
+            </svg>
+            <span id="pauseBtnText">Duraklat</span>
+          </button>
+
+          <button id="btnCancelRecording" class="btn btn-ghost btn-lg">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+            İptal Et
+          </button>
+        </div>
+      </section>
+
+      <!-- STATE 2.5: TIMELINE & TRIM EDITOR PANEL -->
+      <section id="panelEditor" class="panel-card">
+        <div class="editor-header">
+          <div>
+            <h2>🎬 Kayıt Düzenleyici: Kırpma & Kesme</h2>
+            <p>Zaman çizelgesinde gezinin; baştan, sondan veya ortadan istemediğiniz kareleri çıkarın.</p>
+          </div>
+          <div class="editor-quick-actions">
+            <button id="btnResetCuts" class="btn btn-secondary btn-sm" title="Tüm kesimleri sıfırlar ve orijinal kayda döner">
+              🔄 Kesimleri Sıfırla
+            </button>
+          </div>
+        </div>
+
+        <!-- Frame Monitor Viewport -->
+        <div class="editor-monitor-wrapper">
+          <canvas id="editorCanvas"></canvas>
+        </div>
+
+        <!-- Timeline & Scrubber Controls -->
+        <div class="timeline-container">
+          <div class="timeline-bar-wrapper">
+            <input type="range" id="timelineSlider" min="0" max="0" value="0" step="1">
+          </div>
+
+          <div class="timeline-timecode-row">
+            <div class="playback-buttons">
+              <button id="btnEditorPrevFrame" class="btn btn-icon" title="Önceki Kare">
+                <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="19 20 9 12 19 4 19 20"/>
+                  <line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2"/>
+                </svg>
+              </button>
+
+              <button id="btnEditorPlayPause" class="btn btn-primary btn-icon" title="Oynat / Durdur">
+                <svg id="editorPlayIcon" class="icon" viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+              </button>
+
+              <button id="btnEditorNextFrame" class="btn btn-icon" title="Sonraki Kare">
+                <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="5 4 15 12 5 20 5 4"/>
+                  <line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2"/>
+                </svg>
+              </button>
+            </div>
+
+            <div class="timecode-display">
+              <span>Şu Anki Konum:</span>
+              <strong id="editorCurrentFrameDisplay">Kare: 1 / 1</strong>
+              <span class="time-pill" id="editorCurrentTimeDisplay">00:00.0</span>
+            </div>
+
+            <div class="stats-summary-pill">
+              <span>Kalan: <strong id="editorRemainingDisplay">0 kare (0.0s)</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Editing Tools Grid (Baştan / Sondan / Ortadan) -->
+        <div class="tools-grid">
+          <!-- 1. Baştan ve Sondan Kırpma -->
+          <div class="tool-card">
+            <h3>1. Baştan & Sondan Kırp</h3>
+            <p>Mevcut kareye kadar olan girişi veya bu kareden sonraki çıkışı kesin.</p>
+            <div class="tool-actions">
+              <button id="btnTrimStart" class="btn btn-secondary">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                Bu Kareyi Başlangıç Yap (Öncesini Kes)
+              </button>
+              <button id="btnTrimEnd" class="btn btn-secondary">
+                Bu Kareyi Bitiş Yap (Sonrasını Kes)
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- 2. Ortadan Bölüm Çıkar -->
+          <div class="tool-card">
+            <h3>2. Ortadan İstenmeyen Bölümü Kes & Çıkar</h3>
+            <p>İki nokta belirleyin ve aradaki kareleri kayıttan tamamen silin.</p>
+            <div class="cut-range-row">
+              <button id="btnMarkCutStart" class="btn btn-secondary btn-sm">
+                📍 Başlangıç: <span id="lblCutStart">Seçilmedi</span>
+              </button>
+              <span class="range-arrow">➡️</span>
+              <button id="btnMarkCutEnd" class="btn btn-secondary btn-sm">
+                📍 Bitiş: <span id="lblCutEnd">Seçilmedi</span>
+              </button>
+              <button id="btnExecuteMiddleCut" class="btn btn-danger btn-sm" disabled>
+                ✂️ Aralığı Kes & Çıkar
+              </button>
+            </div>
+            <div id="middleCutLog" class="cut-log-note">
+              Henüz ortadan bir aralık kesilmedi.
+            </div>
+          </div>
+        </div>
+
+        <!-- Editor Bottom Actions -->
+        <div class="editor-bottom-bar">
+          <button id="btnDiscardToNew" class="btn btn-ghost">
+            ❌ İptal Et & Yeni Kayıt
+          </button>
+
+          <button id="btnStartEncodingFromEditor" class="btn btn-record btn-lg">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
+            Kırpılmış Haliyle GIF Oluştur
+          </button>
+        </div>
+      </section>
+
+      <!-- STATE 3: Encoding / Processing Panel -->
+      <section id="panelEncoding" class="panel-card">
+        <div class="encoding-container">
+          <div class="encoding-spinner-ring">
+            <div class="spinner-core"></div>
+          </div>
+          
+          <h2 id="encodingTitle">GIF Oluşturuluyor...</h2>
+          <p id="encodingSub">Kırpılan kareler işleniyor, renk paleti ve LZW sıkıştırması uygulanıyor.</p>
+
+          <div class="progress-bar-wrapper">
+            <div id="progressBarFill" class="progress-bar-fill" style="width: 0%;"></div>
+          </div>
+
+          <div class="progress-info">
+            <span id="progressPercent">0%</span>
+            <span id="progressDetails">Kare hazırlanıyor...</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- STATE 4: Preview & Download Panel -->
+      <section id="panelResult" class="panel-card">
+        <div class="result-header">
+          <div>
+            <h2>🎉 GIF Başarıyla Oluşturuldu!</h2>
+            <p>Aşağıda oluşturulan animasyonu inceleyebilir, indirebilir veya panonuza kopyalayabilirsiniz.</p>
+          </div>
+          <div class="result-top-actions">
+            <button id="btnBackToEditor" class="btn btn-secondary">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 20h9"/>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+              </svg>
+              Kırpmayı Düzenle
+            </button>
+            <button id="btnRecordAgain" class="btn btn-secondary">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="1 4 1 10 7 10"/>
+                <polyline points="23 20 23 14 17 14"/>
+                <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>
+              </svg>
+              Yeni Kayıt Yap
+            </button>
+          </div>
+        </div>
+
+        <div class="result-body">
+          <!-- GIF Preview Container -->
+          <div class="gif-preview-container">
+            <img id="resultGifImage" src="" alt="Oluşturulan GIF Önizlemesi">
+          </div>
+
+          <!-- Sidebar Details & Actions -->
+          <div class="result-sidebar">
+            <div class="info-card">
+              <h3>Dosya Detayları</h3>
+              <div class="info-row">
+                <span class="info-label">Dosya Boyutu:</span>
+                <strong id="infoFileSize" class="highlight-val">0 KB</strong>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Çözünürlük:</span>
+                <strong id="infoResolution">0 × 0 px</strong>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Süre:</span>
+                <strong id="infoDuration">0 sn</strong>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Toplam Kare:</span>
+                <strong id="infoFrames">0</strong>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Kare Hızı:</span>
+                <strong id="infoFps">0 FPS</strong>
+              </div>
+            </div>
+
+            <!-- Export Form -->
+            <div class="export-card">
+              <label for="fileNameInput">Dosya Adı</label>
+              <div class="filename-input-group">
+                <input type="text" id="fileNameInput" class="form-input" value="ekran-kaydi">
+                <span class="input-suffix">.gif</span>
+              </div>
+
+              <div class="export-buttons">
+                <button id="btnDownloadGif" class="btn btn-primary btn-lg">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                  GIF Olarak İndir
+                </button>
+
+                <button id="btnCopyClipboard" class="btn btn-secondary btn-lg">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                  </svg>
+                  Panoya Kopyala
+                </button>
+              </div>
+
+              <div id="copyToast" class="copy-toast hidden">
+                ✓ GIF panoya başarıyla kopyalandı!
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Hidden offscreen canvas for frame capture processing -->
+  <canvas id="offscreenCanvas" style="display:none;"></canvas>
+
+  <script type="module" src="studio.js"></script>
+</body>
+</html>

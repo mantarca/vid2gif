@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>vid2gif - Ekran GIF Kaydedici</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <div class="logo-icon">
+          <span class="record-dot"></span>
+        </div>
+        <div>
+          <h1 class="brand-title">vid2gif</h1>
+          <p class="brand-subtitle">Ekran & GIF Kaydedici</p>
+        </div>
+      </div>
+      <span class="version-badge">v1.0</span>
+    </header>
+
+    <!-- Quick Settings Form -->
+    <div class="settings-card">
+      <div class="setting-item">
+        <div class="setting-label-row">
+          <label for="fpsSelect">Kare Hızı (FPS)</label>
+          <span class="badge" id="fpsBadge">10 FPS</span>
+        </div>
+        <select id="fpsSelect" class="form-select">
+          <option value="5">5 FPS (Çok Düşük Boyut)</option>
+          <option value="10" selected>10 FPS (Önerilen - Dengeli)</option>
+          <option value="15">15 FPS (Akıcı Hareket)</option>
+          <option value="20">20 FPS (Yüksek Akıcılık)</option>
+        </select>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-label-row">
+          <label for="widthSelect">Çözünürlük Ölçeği</label>
+          <span class="badge" id="widthBadge">800px</span>
+        </div>
+        <select id="widthSelect" class="form-select">
+          <option value="640">640 px (Kompakt / Hafif)</option>
+          <option value="800" selected>800 px (Önerilen Standart)</option>
+          <option value="1280">1280 px (720p HD)</option>
+          <option value="0">Orijinal (1:1 Ekran Boyutu)</option>
+        </select>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-label-row">
+          <label for="colorSelect">Renk Kalitesi</label>
+          <span class="badge" id="colorBadge">256 Renk</span>
+        </div>
+        <select id="colorSelect" class="form-select">
+          <option value="256" selected>256 Renk (Maksimum Canlılık)</option>
+          <option value="128">128 Renk (Daha Küçük Dosya)</option>
+          <option value="64">64 Renk (Ultra Küçük / Hızlı)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <button id="btnQuickRecord" class="btn btn-primary">
+        <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+          <circle cx="12" cy="12" r="7"/>
+        </svg>
+        Hemen Kayda Başla
+      </button>
+
+      <button id="btnOpenStudio" class="btn btn-secondary">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+          <line x1="8" y1="21" x2="16" y2="21"/>
+          <line x1="12" y1="17" x2="12" y2="21"/>
+        </svg>
+        Kayıt Stüdyosunu Aç
+      </button>
+    </div>
+
+    <!-- Footer info -->
+    <footer class="footer">
+      <span>💡 Kayıt başladığında tam ekran, pencere veya sekme seçebilirsiniz.</span>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
